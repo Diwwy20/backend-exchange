@@ -1,6 +1,5 @@
 import prisma from "../config/prisma.config.js";
 
-// User related helpers
 export const getUserWithWallets = async (userId) => {
   return await prisma.users.findUnique({
     where: { id: userId },
@@ -41,7 +40,6 @@ export const getUserWithAll = async (userId) => {
   });
 };
 
-// Wallet related helpers
 export const getWalletWithUser = async (walletId) => {
   return await prisma.wallets.findUnique({
     where: { id: walletId },
@@ -51,7 +49,6 @@ export const getWalletWithUser = async (walletId) => {
   });
 };
 
-// Order related helpers
 export const getOrderWithUser = async (orderId) => {
   return await prisma.orders.findUnique({
     where: { id: orderId },
@@ -61,7 +58,6 @@ export const getOrderWithUser = async (orderId) => {
   });
 };
 
-// Transaction related helpers
 export const getTransactionWithUsers = async (transactionId) => {
   return await prisma.transactions.findUnique({
     where: { id: transactionId },
@@ -72,7 +68,6 @@ export const getTransactionWithUsers = async (transactionId) => {
   });
 };
 
-// Get active buy orders for a specific currency
 export const getActiveBuyOrders = async (currency) => {
   return await prisma.orders.findMany({
     where: {
@@ -91,12 +86,11 @@ export const getActiveBuyOrders = async (currency) => {
       }
     },
     orderBy: {
-      pricePerCoin: 'desc' // Highest buy price first
+      pricePerCoin: 'desc' 
     }
   });
 };
 
-// Get active sell orders for a specific currency
 export const getActiveSellOrders = async (currency) => {
   return await prisma.orders.findMany({
     where: {
@@ -115,12 +109,11 @@ export const getActiveSellOrders = async (currency) => {
       }
     },
     orderBy: {
-      pricePerCoin: 'asc' // Lowest sell price first
+      pricePerCoin: 'asc' 
     }
   });
 };
 
-// Get user's wallet balance for a specific currency
 export const getUserWalletBalance = async (userId, currency) => {
   const wallet = await prisma.wallets.findFirst({
     where: {
@@ -132,11 +125,8 @@ export const getUserWalletBalance = async (userId, currency) => {
   return wallet ? wallet.balance : 0;
 };
 
-// Execute a trade between a buyer and a seller
 export const executeTrade = async (buyerId, sellerId, orderId, amount, currency) => {
-  // Start a transaction to ensure data consistency
   return await prisma.$transaction(async (tx) => {
-    // Get the order
     const order = await tx.orders.findUnique({
       where: { id: orderId }
     });
@@ -145,10 +135,10 @@ export const executeTrade = async (buyerId, sellerId, orderId, amount, currency)
       throw new Error('Order is not available');
     }
     
-    // Calculate fiat amount
+    
     const fiatAmount = amount * order.pricePerCoin;
     
-    // Update buyer's wallet
+    
     const buyerWallet = await tx.wallets.findFirst({
       where: { userId: buyerId, currency }
     });
@@ -168,7 +158,6 @@ export const executeTrade = async (buyerId, sellerId, orderId, amount, currency)
       });
     }
     
-    // Update seller's wallet
     const sellerWallet = await tx.wallets.findFirst({
       where: { userId: sellerId, currency }
     });
@@ -182,7 +171,7 @@ export const executeTrade = async (buyerId, sellerId, orderId, amount, currency)
       data: { balance: sellerWallet.balance - amount }
     });
     
-    // Create transaction record
+  
     const transaction = await tx.transactions.create({
       data: {
         senderId: sellerId,
@@ -195,7 +184,7 @@ export const executeTrade = async (buyerId, sellerId, orderId, amount, currency)
       }
     });
     
-    // Update order
+  
     const remainingAmount = order.amount - amount;
     if (remainingAmount <= 0) {
       await tx.orders.update({

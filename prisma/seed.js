@@ -4,13 +4,11 @@ import prisma from '../config/prisma.config.js';
 async function main() {
   console.log("🌱 Start seeding...");
 
-  // 1. ลบข้อมูลที่ไม่เกี่ยวกับผู้ใช้จริง
   await prisma.transactions.deleteMany();
   await prisma.orders.deleteMany();
   await prisma.wallets.deleteMany();
   await prisma.refresh_tokens.deleteMany();
 
-  // 2. ลบเฉพาะผู้ใช้ mock data
   await prisma.users.deleteMany({
     where: {
       email: {
@@ -21,7 +19,6 @@ async function main() {
 
   const passwordHash = await bcrypt.hash('12345678', 10);
 
-  // 3. สร้าง users
   const users = [];
   for (let i = 1; i <= 5; i++) {
     users.push(
@@ -37,14 +34,13 @@ async function main() {
 
   const currencies = ['BTC', 'ETH', 'XRP', 'DOGE'];
 
-  // 4. สร้าง wallets โดยคละสกุลเงิน 4 ตัว
   const walletsData = [];
   users.forEach(user => {
     currencies.forEach(currency => {
       walletsData.push({
         userId: user.id,
         currency: currency,
-        balance: parseFloat((1 + Math.random() * 10).toFixed(2)), // Random balance
+        balance: parseFloat((1 + Math.random() * 10).toFixed(2)), 
       });
     });
   });
@@ -53,7 +49,6 @@ async function main() {
     data: walletsData,
   });
 
-  // 5. สร้าง orders (ตลาดซื้อขาย)
   await prisma.orders.createMany({
     data: [
       {
@@ -104,7 +99,6 @@ async function main() {
     ],
   });
 
-  // 6. สร้าง transactions (จำลองการโอน)
   await prisma.transactions.createMany({
     data: [
       {

@@ -1,7 +1,6 @@
 import prisma from "../config/prisma.config.js";
 
 export const OrderRepository = {
-  // Find order with user details
   async findWithUser(orderId) {
     return prisma.orders.findUnique({
       where: { id: Number(orderId) },
@@ -18,7 +17,6 @@ export const OrderRepository = {
     });
   },
 
-  // Find active orders for a specific currency
   async findActiveByCurrency(currency, type = null) {
     const filters = {
       currency,
@@ -47,7 +45,6 @@ export const OrderRepository = {
     });
   },
 
-  // Find orders by type and user
   async findByTypeAndUser(type, userId) {
     return prisma.orders.findMany({
       where: {
@@ -60,7 +57,6 @@ export const OrderRepository = {
     });
   },
 
-  // Get market data (highest buy, lowest sell)
   async getMarketData(currency) {
     const buyOrders = await prisma.orders.findMany({
       where: {

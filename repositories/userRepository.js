@@ -1,7 +1,6 @@
 import prisma from '../config/prisma.config.js';
 
 export const UserRepository = {
-  // Get user with wallets
   async findWithWallets(userId) {
     return prisma.users.findUnique({
       where: { id: userId },
@@ -11,7 +10,6 @@ export const UserRepository = {
     });
   },
 
-  // Get user with orders
   async findWithOrders(userId) {
     return prisma.users.findUnique({
       where: { id: userId },
@@ -25,7 +23,6 @@ export const UserRepository = {
     });
   },
 
-  // Get user with transactions (both sent and received)
   async findWithTransactions(userId) {
     return prisma.users.findUnique({
       where: { id: userId },
@@ -64,7 +61,6 @@ export const UserRepository = {
     });
   },
 
-  // Get user's complete profile with all relations
   async findCompleteProfile(userId) {
     return prisma.users.findUnique({
       where: { id: userId },

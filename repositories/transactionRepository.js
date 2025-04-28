@@ -1,7 +1,6 @@
 import prisma from '../config/prisma.config.js';
 
 export const TransactionRepository = {
-  // Find transaction with related users
   async findWithRelations(transactionId) {
     return prisma.transactions.findUnique({
       where: { id: Number(transactionId) },
@@ -26,7 +25,6 @@ export const TransactionRepository = {
     });
   },
 
-  // Get user's transactions (both sent and received)
   async findByUser(userId) {
     const sentTransactions = await prisma.transactions.findMany({
       where: {
@@ -69,7 +67,6 @@ export const TransactionRepository = {
     return { sentTransactions, receivedTransactions };
   },
 
-  // Get transaction statistics by currency
   async getStatsByCurrency(currency) {
     const totalVolume = await prisma.transactions.aggregate({
       where: {

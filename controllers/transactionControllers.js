@@ -1,13 +1,11 @@
 import prisma from "../config/prisma.config.js";
 import { WalletRepository } from "../repositories/walletRepository.js";
 
-// Create an internal transaction (between users)
 export const createTransaction = async (req, res, next) => {
     const { receiverId, amount, currency } = req.body;
     const senderId = req.userId;
   
     try {
-      // ทำ transaction พร้อมหัก/เพิ่ม balance
       const transaction = await WalletRepository.processInternalTransaction(
         senderId,
         receiverId,
@@ -130,8 +128,6 @@ export const getTransactionById = async (req, res, next) => {
     }
 };
 
-// Buy/sell crypto (special transaction between users)
-// Buy/sell crypto (special transaction between users)
 export const tradeCrypto = async (req, res, next) => {
     const { orderId, amount } = req.body;
     const buyerId = req.userId;
@@ -169,10 +165,7 @@ export const tradeCrypto = async (req, res, next) => {
         
         const fiatAmount = amount * order.pricePerCoin;
         
-        // Process based on order type
         if (order.type === 'SELL') {
-            // Seller selling crypto for fiat
-            // Check if seller has sufficient crypto
             const sellerHasCrypto = await WalletRepository.hasSufficientBalance(
                 sellerId, order.currency, amount
             );
@@ -183,21 +176,14 @@ export const tradeCrypto = async (req, res, next) => {
                     message: `Seller has insufficient ${order.currency} balance`
                 });
             }
-            
-            // Check if buyer has sufficient fiat - this is conceptual since we don't store fiat in wallets
-            // For a real implementation, you would check fiat balances in a different way
-            
-            // Process the trade
-            // 1. Transfer crypto from seller to buyer
+        
             await WalletRepository.updateBalance(sellerId, order.currency, -amount);
             await WalletRepository.updateBalance(buyerId, order.currency, amount);
             
-            // 2. Create transaction record (no actual fiat transfer in the code,
-            // but this would be handled by your payment processor in a real app)
             const transaction = await prisma.transactions.create({
                 data: {
-                    senderId: sellerId,  // Seller sends crypto
-                    receiverId: buyerId, // Buyer receives crypto
+                    senderId: sellerId,  
+                    receiverId: buyerId, 
                     amount,
                     currency: order.currency,
                     fiatAmount,
@@ -206,7 +192,6 @@ export const tradeCrypto = async (req, res, next) => {
                 }
             });
             
-            // Update order amount or status
             const remainingAmount = order.amount - amount;
             let updatedOrder;
             
@@ -233,8 +218,6 @@ export const tradeCrypto = async (req, res, next) => {
             });
             
         } else if (order.type === 'BUY') {
-            // Seller buying crypto with fiat (buyer is selling crypto)
-            // Check if buyer has sufficient crypto
             const buyerHasCrypto = await WalletRepository.hasSufficientBalance(
                 buyerId, order.currency, amount
             );
@@ -245,17 +228,14 @@ export const tradeCrypto = async (req, res, next) => {
                     message: `Insufficient ${order.currency} balance`
                 });
             }
-            
-            // Process the trade
-            // 1. Transfer crypto from buyer to seller
+
             await WalletRepository.updateBalance(buyerId, order.currency, -amount);
             await WalletRepository.updateBalance(sellerId, order.currency, amount);
             
-            // 2. Create transaction record
             const transaction = await prisma.transactions.create({
                 data: {
-                    senderId: buyerId,    // Buyer sends crypto
-                    receiverId: sellerId, // Seller receives crypto
+                    senderId: buyerId,   
+                    receiverId: sellerId, 
                     amount,
                     currency: order.currency,
                     fiatAmount,
@@ -264,7 +244,6 @@ export const tradeCrypto = async (req, res, next) => {
                 }
             });
             
-            // Update order amount or status
             const remainingAmount = order.amount - amount;
             let updatedOrder;
             

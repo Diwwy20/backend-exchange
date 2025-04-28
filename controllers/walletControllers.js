@@ -56,7 +56,6 @@ export const createWallet = async (req, res, next) => {
     const { currency } = req.body;
     
     try {
-        // Check if wallet already exists
         const existingWallet = await prisma.wallets.findFirst({
             where: {
                 userId,
@@ -153,7 +152,6 @@ export const transferFunds = async (req, res, next) => {
     const { receiverEmail, currency, amount } = req.body;
     
     try {
-        // Find receiver
         const receiver = await prisma.users.findUnique({
             where: {
                 email: receiverEmail
@@ -167,7 +165,6 @@ export const transferFunds = async (req, res, next) => {
             });
         }
         
-        // Check if sender has sufficient balance
         const hasSufficientBalance = await WalletRepository.hasSufficientBalance(
             senderId, 
             currency, 
@@ -181,7 +178,6 @@ export const transferFunds = async (req, res, next) => {
             });
         }
         
-        // Process the transaction
         const transaction = await WalletRepository.processInternalTransaction(
             senderId,
             receiver.id,

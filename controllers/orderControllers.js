@@ -1,6 +1,5 @@
 import prisma from "../config/prisma.config.js";
 
-// Create a new buy/sell order
 export const createOrder = async (req, res, next) => {
     const { type, currency, amount, pricePerCoin, fiat } = req.body;
     const userId = req.userId;
@@ -28,7 +27,6 @@ export const createOrder = async (req, res, next) => {
     }
 };
 
-// Get all orders (with filtering options)
 export const getOrders = async (req, res, next) => {
     const { type, currency, fiat, status } = req.query;
     

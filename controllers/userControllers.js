@@ -9,16 +9,13 @@ export const register = async (req, res, next) => {
     const { email, password } = req.body;
   
     try {
-        // ตรวจสอบว่ามีผู้ใช้ที่มีอีเมลนี้แล้วหรือไม่
         const existingUser = await prisma.users.findUnique({ where: { email } });
         if (existingUser) {
             return res.status(400).send({ success: false, message: 'Email already registered' });
         }
   
-        // เข้ารหัสรหัสผ่าน
         const hashedPassword = await bcrypt.hash(password, 10);
   
-        // สร้างผู้ใช้ใหม่
         const user = await prisma.users.create({
             data: {
                 email,
@@ -27,24 +24,22 @@ export const register = async (req, res, next) => {
             },
         });
   
-        // สร้างกระเป๋าเงินเริ่มต้นสำหรับผู้ใช้
         await prisma.wallets.createMany({
             data: [
-                { userId: user.id, currency: 'BTC', balance: 5000000000 },
-                { userId: user.id, currency: 'ETH', balance: 5000000000 },
-                { userId: user.id, currency: 'XRP', balance: 5000000000 },
-                { userId: user.id, currency: 'DOGE', balance: 5000000000 },
+                { userId: user.id, currency: 'BTC', balance: 10 },
+                { userId: user.id, currency: 'ETH', balance: 40 },
+                { userId: user.id, currency: 'XRP', balance: 200000 },
+                { userId: user.id, currency: 'DOGE', balance: 1000000 },
             ]
         });
   
-        // ส่งคำตอบว่าเพิ่มผู้ใช้และกระเป๋าเงินเริ่มต้นสำเร็จ
+
         res.status(201).send({
             success: true,
             message: 'User registered successfully with starter wallets!',
             user,
         });
     } catch (error) {
-        // ถ้ามีข้อผิดพลาด ให้ส่งไปที่ error handler
         next(error);
     }
 };
